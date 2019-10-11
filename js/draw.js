@@ -72,8 +72,7 @@ window.addEventListener("DOMContentLoaded", function() {
     scene.add(object);
 
     var geo = new THREE.EdgesGeometry(object.geometry);
-    var mat = new THREE.LineBasicMaterial(
-        {color : colors[id % colors.length], linewidth : 0});
+    var mat = new THREE.LineBasicMaterial({color : 0x000000, opacity: 1});
     var wireframe = new THREE.LineSegments(geo, mat);
 
     object.add(wireframe);
