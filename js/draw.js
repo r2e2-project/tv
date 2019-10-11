@@ -51,14 +51,14 @@ window.addEventListener("DOMContentLoaded", function() {
     var lambert_material = new THREE.MeshLambertMaterial({
       color : colors[id % colors.length],
       opacity : 0.01,
-      polygonOffset: true,
-      polygonOffsetFactor: 1,
-      polygonOffsetUnits: 1,
+      polygonOffset : true,
+      polygonOffsetFactor : 1,
+      polygonOffsetUnits : 1,
       opacity : 0.9,
       transparent : true
     })
-    
-    var object = new THREE.Mesh(geometry, lambert_material );
+
+    var object = new THREE.Mesh(geometry, lambert_material);
     object.position.x = (treelet.bounds[0][0] + treelet.bounds[1][0]) / 2;
     object.position.y = (treelet.bounds[0][1] + treelet.bounds[1][1]) / 2;
     object.position.z = (treelet.bounds[0][2] + treelet.bounds[1][2]) / 2;
@@ -69,11 +69,12 @@ window.addEventListener("DOMContentLoaded", function() {
 
     scene.add(object);
 
-    var geo = new THREE.EdgesGeometry( object.geometry ); 
-    var mat = new THREE.LineBasicMaterial( { color: colors[id % colors.length], linewidth: 0 } );
-    var wireframe = new THREE.LineSegments( geo, mat );
+    var geo = new THREE.EdgesGeometry(object.geometry);
+    var mat = new THREE.LineBasicMaterial(
+        {color : colors[id % colors.length], linewidth : 0});
+    var wireframe = new THREE.LineSegments(geo, mat);
 
-    object.add( wireframe );
+    object.add(wireframe);
     treelets[id].object_id = object.id;
     object_to_treelet[object.id] = id;
 
