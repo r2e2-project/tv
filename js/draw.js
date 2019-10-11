@@ -1,7 +1,22 @@
 window.addEventListener("DOMContentLoaded", function() {
   var object_to_treelet = {};
-  var current_treelet = null;
+  var treelet_stack = [];
   var must_redraw = false;
+
+  /* CONTAINER */
+  var container = document.createElement('div');
+  document.body.appendChild(container);
+
+  var back_button = document.querySelector("#back");
+  back_button.onclick = function(e) {
+    e.preventDefault();
+    treelet_stack.pop();
+    must_redraw = true;
+
+    if (treelet_stack.length == 0) {
+      back_button.style.visibility = "hidden";
+    }
+  };
 
   /* SCENE */
   var scene = new THREE.Scene();
@@ -25,7 +40,7 @@ window.addEventListener("DOMContentLoaded", function() {
 
     var object = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({
       color : Math.random() * 0xffffff,
-      opacity : 0.5,
+      opacity : 0.8,
       transparent : true
     }));
 
@@ -41,7 +56,7 @@ window.addEventListener("DOMContentLoaded", function() {
     treelets[id].object_id = object.id;
     object_to_treelet[object.id] = id;
 
-    object.visible = (treelets[id].parent == current_treelet);
+    object.visible = (treelets[id].parent === null);
   }
 
   /* MOUSE */
@@ -53,7 +68,7 @@ window.addEventListener("DOMContentLoaded", function() {
   var renderer = new THREE.WebGLRenderer();
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
+  container.appendChild(renderer.domElement);
   document.addEventListener('mousemove', on_mouse_move, false);
   document.addEventListener('resize', on_window_resize, false);
   document.addEventListener('mouseup', on_mouse_up, false);
@@ -73,16 +88,16 @@ window.addEventListener("DOMContentLoaded", function() {
     if (intersects.length > 0) {
       if (intersected != intersects[0].object) {
         if (intersected) {
-          intersected.material.emissive.setHex(intersected.currentHex);
+          intersected.material.emissive.setHex(intersected.current_hex);
         }
 
         intersected = intersects[0].object;
-        intersected.currentHex = intersected.material.emissive.getHex();
+        intersected.current_hex = intersected.material.emissive.getHex();
         intersected.material.emissive.setHex(0xff0000);
       }
     } else {
       if (intersected) {
-        intersected.material.emissive.setHex(intersected.currentHex);
+        intersected.material.emissive.setHex(intersected.current_hex);
       }
 
       intersected = null;
@@ -95,7 +110,7 @@ window.addEventListener("DOMContentLoaded", function() {
     if (must_redraw) {
       for (var id in treelets) {
         scene.getObjectById(treelets[id].object_id).visible =
-          (treelets[id].parent == current_treelet);
+            (treelets[id].parent == treelet_stack.slice(-1)[0]);
       }
 
       must_redraw = false;
@@ -116,8 +131,9 @@ window.addEventListener("DOMContentLoaded", function() {
     e.preventDefault();
 
     if (intersected !== null) {
-      current_treelet = object_to_treelet[intersected.id];
+      treelet_stack.push(object_to_treelet[intersected.id]);
       must_redraw = true;
+      back_button.style.visibility = "visible";
     }
   }
 
