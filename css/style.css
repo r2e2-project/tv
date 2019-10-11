@@ -1,0 +1,19 @@
+#info {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  user-select: none;
+  pointer-events: none;
+  z-index: 1;
+}
+
+#back {
+  visibility: hidden;
+}
+
+a {
+  pointer-events:auto;
+}
