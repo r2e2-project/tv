@@ -50,7 +50,6 @@ window.addEventListener("DOMContentLoaded", function() {
 
     var lambert_material = new THREE.MeshLambertMaterial({
       color : colors[id % colors.length],
-      opacity : 0.01,
       polygonOffset : true,
       polygonOffsetFactor : 1,
       polygonOffsetUnits : 1,
@@ -63,9 +62,12 @@ window.addEventListener("DOMContentLoaded", function() {
     object.position.y = (treelet.bounds[0][1] + treelet.bounds[1][1]) / 2;
     object.position.z = (treelet.bounds[0][2] + treelet.bounds[1][2]) / 2;
 
-    object.scale.x = (treelet.bounds[1][0] - treelet.bounds[0][0]) * 0.95;
-    object.scale.y = (treelet.bounds[1][1] - treelet.bounds[0][1]) * 0.95;
-    object.scale.z = (treelet.bounds[1][2] - treelet.bounds[0][2]) * 0.95;
+    object.scale.x = (treelet.bounds[1][0] - treelet.bounds[0][0]) * 0.95 +
+                     ((Math.random() - 0.5) / 100);
+    object.scale.y = (treelet.bounds[1][1] - treelet.bounds[0][1]) * 0.95 +
+                     ((Math.random() - 0.5) / 100);
+    object.scale.z = (treelet.bounds[1][2] - treelet.bounds[0][2]) * 0.95 +
+                     ((Math.random() - 0.5) / 100);
 
     scene.add(object);
 
