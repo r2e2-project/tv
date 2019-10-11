@@ -50,7 +50,7 @@ window.addEventListener("DOMContentLoaded", function() {
 
     var object = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({
       color : colors[id % colors.length],
-      opacity : 0.99,
+      opacity : 0.9,
       transparent : true
     }));
 
