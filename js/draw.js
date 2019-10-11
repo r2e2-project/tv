@@ -54,6 +54,7 @@ window.addEventListener("DOMContentLoaded", function() {
       polygonOffset: true,
       polygonOffsetFactor: 1,
       polygonOffsetUnits: 1,
+      opacity : 0.9,
       transparent : true
     })
     
