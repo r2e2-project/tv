@@ -12,8 +12,21 @@
 
 #back {
   visibility: hidden;
+  vertical-align: middle;
+  padding-right: 10px;
+}
+
+#back img {
+  height: 30px;
 }
 
 a {
   pointer-events:auto;
+  text-decoration:none;
+}
+
+#breadcrumbs {
+  font-size:22px;
+  font-family: "Helvetica Neue";
+  font-weight:400;
 }

@@ -11,12 +11,16 @@ window.addEventListener("DOMContentLoaded", function() {
   back_button.onclick = function(e) {
     e.preventDefault();
     treelet_stack.pop();
+    update_breadcrumbs();
     must_redraw = true;
 
     if (treelet_stack.length == 0) {
       back_button.style.visibility = "hidden";
     }
   };
+
+  /* BREADCRUMBS */
+  var breadcrumbs = document.querySelector("#breadcrumbs");
 
   /* SCENE */
   var scene = new THREE.Scene();
@@ -28,7 +32,7 @@ window.addEventListener("DOMContentLoaded", function() {
   camera.position.z = 5;
 
   /* LIGHT */
-  var light = new THREE.AmbientLight(0x404040);
+  var light = new THREE.AmbientLight(0xcccccc);
   // light.position.set(0, 0, 0).normalize();
   scene.add(light);
 
@@ -40,7 +44,7 @@ window.addEventListener("DOMContentLoaded", function() {
 
     var object = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({
       color : Math.random() * 0xffffff,
-      opacity : 0.8,
+      opacity : 0.95,
       transparent : true
     }));
 
@@ -121,6 +125,10 @@ window.addEventListener("DOMContentLoaded", function() {
     renderer.render(scene, camera);
   };
 
+  function update_breadcrumbs() {
+    breadcrumbs.innerHTML = treelet_stack.join(" &#8594; ");
+  }
+
   function on_mouse_move(e) {
     e.preventDefault();
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -134,6 +142,7 @@ window.addEventListener("DOMContentLoaded", function() {
       treelet_stack.push(object_to_treelet[intersected.id]);
       must_redraw = true;
       back_button.style.visibility = "visible";
+      update_breadcrumbs();
     }
   }
 
