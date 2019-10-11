@@ -1,3 +1,9 @@
+let colors = [
+  0xe6194b, 0x3cb44b, 0xffe119, 0x4363d8, 0xf58231, 0x911eb4, 0x42d4f4,
+  0xf032e6, 0xbfef45, 0xfabebe, 0x469990, 0xe6beff, 0x9A6324, 0xfffac8,
+  0x800000, 0xaaffc3, 0x808000, 0xffd8b1, 0x000075, 0xa9a9a9
+];
+
 window.addEventListener("DOMContentLoaded", function() {
   var object_to_treelet = {};
   var treelet_stack = [];
@@ -43,8 +49,8 @@ window.addEventListener("DOMContentLoaded", function() {
     let treelet = treelets[id];
 
     var object = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({
-      color : Math.random() * 0xffffff,
-      opacity : 0.95,
+      color : colors[id % colors.length],
+      opacity : 0.99,
       transparent : true
     }));
 
@@ -97,7 +103,7 @@ window.addEventListener("DOMContentLoaded", function() {
 
         intersected = intersects[0].object;
         intersected.current_hex = intersected.material.emissive.getHex();
-        intersected.material.emissive.setHex(0xff0000);
+        intersected.material.emissive.setHex(0x333333);
       }
     } else {
       if (intersected) {
