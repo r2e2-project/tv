@@ -4,31 +4,31 @@ let colors = [
   0x800000, 0xaaffc3, 0x808000, 0xffd8b1, 0x000075, 0xa9a9a9
 ];
 
-let node_colors = [0xff0000, 0x0000ff];
+let node_colors = [ 0xff0000, 0x0000ff ];
 
 var materials = [];
 var node_materials = [];
 
 for (var id in colors) {
   materials.push(new THREE.MeshLambertMaterial({
-      color : colors[id],
-      polygonOffset : true,
-      polygonOffsetFactor : 1,
-      polygonOffsetUnits : 1,
-      opacity : 1.0,
-      transparent : true
-    }));
+    color : colors[id],
+    polygonOffset : true,
+    polygonOffsetFactor : 1,
+    polygonOffsetUnits : 1,
+    opacity : 1.0,
+    transparent : true
+  }));
 }
 
 for (var id in node_colors) {
   node_materials.push(new THREE.MeshLambertMaterial({
-      color : node_colors[id],
-      polygonOffset : true,
-      polygonOffsetFactor : 1,
-      polygonOffsetUnits : 1,
-      opacity : 1.0,
-      transparent : true
-    }));
+    color : node_colors[id],
+    polygonOffset : true,
+    polygonOffsetFactor : 1,
+    polygonOffsetUnits : 1,
+    opacity : 1.0,
+    transparent : true
+  }));
 }
 
 window.addEventListener("DOMContentLoaded", function() {
@@ -44,14 +44,14 @@ window.addEventListener("DOMContentLoaded", function() {
 
   var back_button = document.querySelector("#back");
   var show_internals_checkbox = document.querySelector("#show-internals");
+  var show_internals_switch = document.querySelector("#show-internals-switch");
 
   back_button.onclick = function(e) {
     e.preventDefault();
 
     if (show_internals) {
       internals_stack.pop();
-    }
-    else {
+    } else {
       treelet_stack.pop();
     }
 
@@ -60,11 +60,11 @@ window.addEventListener("DOMContentLoaded", function() {
 
     if (treelet_stack.length == 0) {
       back_button.style.visibility = "hidden";
-      show_internals_checkbox.style.visibility = "hidden";
+      show_internals_switch.style.visibility = "hidden";
     }
   };
 
-  show_internals_checkbox.onclick = function(e) {
+  show_internals_switch.onclick = function(e) {
     show_internals = show_internals_checkbox.checked;
     update_breadcrumbs();
     must_redraw = true;
@@ -88,16 +88,15 @@ window.addEventListener("DOMContentLoaded", function() {
 
   /* LIGHT */
   var light = new THREE.AmbientLight(0xcccccc);
-  // light.position.set(0, 0, 0).normalize();
   scene.add(light);
 
   /* CUBES */
   var geometry = new THREE.BoxBufferGeometry(1, 1, 1);
 
   var create_cube = function(id, is_treelet, x_min, x_max) {
-    var object = new THREE.Mesh(geometry,
-                                is_treelet ? materials[id % materials.length]
-                                           : node_materials[id % node_materials.length]);
+    var object = new THREE.Mesh(
+        geometry, is_treelet ? materials[id % materials.length]
+                             : node_materials[id % node_materials.length]);
 
     object.position.x = (x_min[0] + x_max[0]) / 2;
     object.position.y = (x_min[1] + x_max[1]) / 2;
@@ -109,11 +108,11 @@ window.addEventListener("DOMContentLoaded", function() {
     scene.add(object);
 
     var geo = new THREE.EdgesGeometry(object.geometry);
-    var mat = new THREE.LineBasicMaterial({color : 0x000000, opacity: 1});
+    var mat = new THREE.LineBasicMaterial({color : 0x000000, opacity : 1});
     var wireframe = new THREE.LineSegments(geo, mat);
 
     object.add(wireframe);
-    object_info[object.id] = {id: id, is_treelet: is_treelet};
+    object_info[object.id] = {id : id, is_treelet : is_treelet};
   };
 
   create_cube(0, true, treelets[0].bounds[0], treelets[0].bounds[1]);
@@ -124,7 +123,7 @@ window.addEventListener("DOMContentLoaded", function() {
   var offset = new THREE.Vector3(10, 10, 10);
 
   /* RENDERED */
-  var renderer = new THREE.WebGLRenderer({antialias: true});
+  var renderer = new THREE.WebGLRenderer({antialias : true});
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   container.appendChild(renderer.domElement);
@@ -139,14 +138,15 @@ window.addEventListener("DOMContentLoaded", function() {
   var controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.update();
 
-  var highlight_treelet = function() {
+  var highlight_treelet =
+      function() {
     raycaster.setFromCamera(mouse, camera);
     var intersects = raycaster.intersectObjects(scene.children);
 
     if (intersects.length > 0) {
       if (intersected != intersects[0].object) {
-        scene.traverse( function( node ) {
-          if ( node instanceof THREE.Mesh ) {
+        scene.traverse(function(node) {
+          if (node instanceof THREE.Mesh) {
             node.material.opacity = 0.8;
           }
         });
@@ -155,8 +155,8 @@ window.addEventListener("DOMContentLoaded", function() {
         intersected.material.opacity = 1.0;
       }
     } else {
-      scene.traverse( function( node ) {
-        if ( node instanceof THREE.Mesh ) {
+      scene.traverse(function(node) {
+        if (node instanceof THREE.Mesh) {
           node.material.opacity = 1.0;
         }
       });
@@ -169,8 +169,8 @@ window.addEventListener("DOMContentLoaded", function() {
     requestAnimationFrame(animate);
 
     if (must_redraw) {
-      while(scene.children.length > 0){ 
-        scene.remove(scene.children[0]); 
+      while (scene.children.length > 0) {
+        scene.remove(scene.children[0]);
       }
 
       object_info = {}; // clear out objects
@@ -185,22 +185,23 @@ window.addEventListener("DOMContentLoaded", function() {
 
         if (current_node_index == null) {
           current_node_index = 0;
-          create_cube(current_node_index, false, nodes[current_node_index][0], nodes[current_node_index][1]);
-        }
-        else {
+          create_cube(current_node_index, false, nodes[current_node_index][0],
+                      nodes[current_node_index][1]);
+        } else {
           let left_index = 2 * (current_node_index + 1) - 1;
           let right_index = 2 * (current_node_index + 1);
 
           if (nodes[left_index]) {
-            create_cube(left_index, false, nodes[left_index][0], nodes[left_index][1]);
+            create_cube(left_index, false, nodes[left_index][0],
+                        nodes[left_index][1]);
           }
 
           if (nodes[right_index]) {
-            create_cube(right_index, false, nodes[right_index][0], nodes[right_index][1]);
+            create_cube(right_index, false, nodes[right_index][0],
+                        nodes[right_index][1]);
           }
         }
-      }
-      else {
+      } else {
         for (var id in treelets) {
           let treelet = treelets[id];
           if (treelet.parent == treelet_stack.slice(-1)[0]) {
@@ -218,8 +219,10 @@ window.addEventListener("DOMContentLoaded", function() {
   };
 
   function update_breadcrumbs() {
-    breadcrumbs.innerHTML = treelet_stack.join(" &#8594; ") +
-                            (show_internals ? (" [" + internals_stack.join(" &#8594; ") + "]") : "");
+    breadcrumbs.innerHTML =
+        treelet_stack.join(" &#8594; ") +
+        (show_internals ? (" [" + internals_stack.join(" &#8594; ") + "]")
+                        : "");
   }
 
   function on_mouse_move(e) {
@@ -236,14 +239,13 @@ window.addEventListener("DOMContentLoaded", function() {
 
       if (info.is_treelet) {
         treelet_stack.push(info.id);
-      }
-      else {
+      } else {
         internals_stack.push(info.id);
       }
-      
+
       must_redraw = true;
       back_button.style.visibility = "visible";
-      show_internals_checkbox.style.visibility = "visible";
+      show_internals_switch.style.visibility = "visible";
       update_breadcrumbs();
     }
   }

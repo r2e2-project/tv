@@ -6,7 +6,7 @@
   <meta charset="utf-8">
   <title>Treelet Viewer</title>
   <style>
-    body { margin: 0; }
+    body { margin: 0; padding:0; }
     canvas { width: 100%; height: 100%; display:block; z-index:0; }
   </style>
 
@@ -18,7 +18,14 @@
   <div id="info">
     <a id="back" href="#"><img src="img/back.svg" /></a>
     <span id="breadcrumbs"></span>
-    <input id="show-internals" type="checkbox" />
+
+    <div id="show-internals-switch">
+        Show Internal BVH Nodes
+        <div class="onoffswitch">
+          <input type="checkbox" name="show-internals" class="onoffswitch-checkbox" id="show-internals">
+          <label class="onoffswitch-label" for="show-internals"></label>
+        </div>
+    </div>
 
   </div>
 

@@ -1,9 +1,12 @@
+body {
+    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
 #info {
   position: fixed;
   top: 20px;
   left: 20px;
   right: 20px;
-  width: 100%;
   padding: 10px;
   box-sizing: border-box;
   user-select: none;
@@ -26,13 +29,58 @@
   text-decoration:none;
 }
 
-#info #show-internals {
-  pointer-events:auto;
+#info #show-internals-switch {
   visibility:hidden;
+  float:right;
+  font-weight:500;
 }
 
 #breadcrumbs {
   font-size:22px;
-  font-family: "Helvetica Neue";
   font-weight:400;
+}
+
+/* ON-OFF SWITCH */
+
+.onoffswitch {
+    display:inline-block;
+    padding-left:10px;
+    vertical-align: middle;
+    position: relative; width: 50px;
+    -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+}
+
+.onoffswitch-checkbox {
+    display: none;
+}
+
+.onoffswitch-label {
+    display: block; overflow: hidden; cursor: pointer;
+    height: 30px; padding: 0; line-height: 30px;
+    border: 2px solid #E3E3E3; border-radius: 30px;
+    background-color: #FFFFFF;
+    transition: background-color 0.3s ease-in;
+    pointer-events:auto;
+}
+
+.onoffswitch-label:before {
+    content: "";
+    display: block; width: 30px; margin: 0px;
+    background: #FFFFFF;
+    position: absolute; top: 0; bottom: 0;
+    right: 18px;
+    border: 2px solid #E3E3E3; border-radius: 30px;
+    transition: all 0.3s ease-in 0s;
+}
+
+.onoffswitch-checkbox:checked + .onoffswitch-label {
+    background-color: #49E845;
+}
+
+.onoffswitch-checkbox:checked + .onoffswitch-label, .onoffswitch-checkbox:checked + .onoffswitch-label:before {
+   border-color: #49E845;
+}
+
+.onoffswitch-checkbox:checked + .onoffswitch-label:before {
+    right: 0px;
 }
