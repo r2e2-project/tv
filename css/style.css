@@ -2,27 +2,33 @@
   position: fixed;
   top: 20px;
   left: 20px;
+  right: 20px;
   width: 100%;
   padding: 10px;
   box-sizing: border-box;
   user-select: none;
   pointer-events: none;
-  z-index: 1;
+  z-index: 1000;
 }
 
-#back {
+#info #back {
   visibility: hidden;
   vertical-align: middle;
   padding-right: 10px;
 }
 
-#back img {
+#info #back img {
   height: 30px;
 }
 
-a {
+#info a {
   pointer-events:auto;
   text-decoration:none;
+}
+
+#info #show-internals {
+  pointer-events:auto;
+  visibility:hidden;
 }
 
 #breadcrumbs {
