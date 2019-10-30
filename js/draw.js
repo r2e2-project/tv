@@ -4,7 +4,17 @@ let colors = [
   0x800000, 0xaaffc3, 0x808000, 0xffd8b1, 0x000075, 0xa9a9a9
 ];
 
-let node_colors = [ 0xff0000, 0x0000ff ];
+let node_colors = [
+  0xff0000,
+  0x0000ff,
+  0x00ff00,
+  0xffff00,
+  0x00ffff,
+  0xff00ff,
+  0xff8800,
+  0x8800ff,
+  0x00ff88,
+];
 
 var materials = [];
 var node_materials = [];
@@ -34,7 +44,7 @@ for (var id in node_colors) {
 window.addEventListener("DOMContentLoaded", function() {
   var object_info = {};
   var treelet_stack = [];
-  var internals_stack = [];
+  var internals_level = 0;
   var must_redraw = false;
   var show_internals = false;
 
@@ -50,7 +60,11 @@ window.addEventListener("DOMContentLoaded", function() {
     e.preventDefault();
 
     if (show_internals) {
-      internals_stack.pop();
+      if (internals_level == 0) {
+        return;
+      }
+
+      internals_level--;
     } else {
       treelet_stack.pop();
     }
@@ -70,7 +84,7 @@ window.addEventListener("DOMContentLoaded", function() {
     must_redraw = true;
 
     if (!show_internals) {
-      internals_stack = [];
+      internals_level = 0;
     }
   };
 
@@ -178,27 +192,16 @@ window.addEventListener("DOMContentLoaded", function() {
 
       if (show_internals) {
         let current_treelet_id = treelet_stack.slice(-1)[0];
-        let current_node_index = internals_stack.slice(-1)[0];
 
         let treelet = treelets[current_treelet_id];
         let nodes = treelet.nodes;
 
-        if (current_node_index == null) {
-          current_node_index = 0;
-          create_cube(current_node_index, false, nodes[current_node_index][0],
-                      nodes[current_node_index][1]);
-        } else {
-          let left_index = 2 * (current_node_index + 1) - 1;
-          let right_index = 2 * (current_node_index + 1);
+        for (var i = 0; i < Math.pow(2, internals_level); i++) {
+          let node_index = Math.pow(2, internals_level) - 1 + i;
+          let node = nodes[node_index];
 
-          if (nodes[left_index]) {
-            create_cube(left_index, false, nodes[left_index][0],
-                        nodes[left_index][1]);
-          }
-
-          if (nodes[right_index]) {
-            create_cube(right_index, false, nodes[right_index][0],
-                        nodes[right_index][1]);
+          if (node) {
+            create_cube(node_index, false, node[0], node[1]);
           }
         }
       } else {
@@ -221,8 +224,7 @@ window.addEventListener("DOMContentLoaded", function() {
   function update_breadcrumbs() {
     breadcrumbs.innerHTML =
         treelet_stack.join(" &#8594; ") +
-        (show_internals ? (" [" + internals_stack.join(" &#8594; ") + "]")
-                        : "");
+        (show_internals ? (" (" + internals_level + ")") : "");
   }
 
   function on_mouse_move(e) {
@@ -240,7 +242,7 @@ window.addEventListener("DOMContentLoaded", function() {
       if (info.is_treelet) {
         treelet_stack.push(info.id);
       } else {
-        internals_stack.push(info.id);
+        internals_level++;
       }
 
       must_redraw = true;
