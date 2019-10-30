@@ -44,6 +44,7 @@ window.addEventListener("DOMContentLoaded", function() {
 
   var back_button = document.querySelector("#back");
   var show_internals_checkbox = document.querySelector("#show-internals");
+  var show_internals_switch = document.querySelector("#show-internals-switch");
 
   back_button.onclick = function(e) {
     e.preventDefault();
