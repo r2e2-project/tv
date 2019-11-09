@@ -77,9 +77,7 @@ var treelet_id_stack = [];
 treelet_id_stack.push(treelets[0].id);
 let treelet = treelets[treelet_id_stack.slice(-1)[0]];
 var BaseBVHNodes = treelet.nodes;
-// create_cube(0,0, true, treelet.bounds[0], treelet.bounds[1]);
-//internal BVH
-renderInternals(0)
+must_redraw = true
 
 document.addEventListener("keydown", onDocumentKeyDown, false);
 function onDocumentKeyDown(event) {
@@ -106,6 +104,7 @@ function onDocumentKeyDown(event) {
 function renderInternals(treelet_id,depth_lvl = 8,beginning_idx = 1){
   let righttmost_idx = Math.pow(2, depth_lvl - 1);
   let nodes_subset = BaseBVHNodes.slice(beginning_idx,2 * righttmost_idx + 1);
+  //render BaseBVHNodes
   for(var node_idx in nodes_subset) {
     let node = nodes_subset[node_idx]
     if(node != null){
@@ -115,6 +114,7 @@ function renderInternals(treelet_id,depth_lvl = 8,beginning_idx = 1){
       create_cube(treelet_id,node_id,false,node_bound_0,node_bound_1)
     }
   }
+  //render BVHNodes with red outline 
   let new_nodes = treelets[treelet_id].nodes.slice(beginning_idx,2 * righttmost_idx + 1);
   for (var node_idx in new_nodes){
     let node = new_nodes[node_idx]
@@ -138,11 +138,8 @@ function animate() {
         scene.remove(scene.children[0]);
       }
       scene.add(light);
-   
-      // create_cube(current_treelet_id,0, true, treelet.bounds[0], treelet.bounds[1]);
-      renderInternals(current_treelet_id)
+         renderInternals(current_treelet_id)
       must_redraw = false;
-
   }
 
   treelet_info_id.textContent = "Treelet ID: " + current_treelet_id.toString(10)
