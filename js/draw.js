@@ -48,6 +48,9 @@ var create_cube = function(treelet_id,id, is_treelet, x_min, x_max) {
 
     object.add(wireframe);
   };
+//instantiate text buffers
+var treelet_info_id = document.getElementById("treelet_info_id");
+var treelet_info_level =  document.getElementById("treelet_info_level");
 
 //instantiate scene 
 var scene = new THREE.Scene();
@@ -89,14 +92,12 @@ function onDocumentKeyDown(event) {
         treelet_id_stack.push(0);
       }
       must_redraw = true
-      // animate();
     } // "s"
     else if(keyCode == 87){
       if(curr_id + 1 < treelets.length){
         treelet_id_stack.push(curr_id + 1)
       }
       must_redraw = true
-      // animate();
 
     } // "w"
 
@@ -130,18 +131,22 @@ function renderInternals(treelet_id,depth_lvl = 8,beginning_idx = 1){
 function animate() {
   requestAnimationFrame( animate );
   controls.update();
+  let current_treelet_id = treelet_id_stack.slice(-1)[0]
+  let current_treelet = treelets[current_treelet_id]  
   if(must_redraw){
      while (scene.children.length > 0) {
         scene.remove(scene.children[0]);
       }
       scene.add(light);
-      let current_treelet_id = treelet_id_stack.slice(-1)[0]
-      let current_treelet = treelets[current_treelet_id] 
+   
       // create_cube(current_treelet_id,0, true, treelet.bounds[0], treelet.bounds[1]);
       renderInternals(current_treelet_id)
       must_redraw = false;
 
   }
+
+  treelet_info_id.textContent = "Treelet ID: " + current_treelet_id.toString(10)
+  treelet_info_level.textContent = "Treelet Level: " + current_treelet.level
   renderer.render( scene, camera );
 }
 animate();
