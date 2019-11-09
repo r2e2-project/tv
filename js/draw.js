@@ -1,262 +1,147 @@
-let colors = [
-  0xe6194b, 0x3cb44b, 0xffe119, 0x4363d8, 0xf58231, 0x911eb4, 0x42d4f4,
-  0xf032e6, 0xbfef45, 0xfabebe, 0x469990, 0xe6beff, 0x9A6324, 0xfffac8,
-  0x800000, 0xaaffc3, 0x808000, 0xffd8b1, 0x000075, 0xa9a9a9
-];
 
-let node_colors = [
-  0xff0000,
-  0x0000ff,
-  0x00ff00,
-  0xffff00,
-  0x00ffff,
-  0xff00ff,
-  0xff8800,
-  0x8800ff,
-  0x00ff88,
-];
-
-var materials = [];
-var node_materials = [];
-
-for (var id in colors) {
-  materials.push(new THREE.MeshLambertMaterial({
-    color : colors[id],
+var treelet_material = new THREE.MeshLambertMaterial({
+    color : 0xe6194b,
     polygonOffset : true,
     polygonOffsetFactor : 1,
     polygonOffsetUnits : 1,
-    opacity : 1.0,
-    transparent : true
-  }));
-}
+    opacity : 0.0,
+    transparent : true,
+    side: THREE.DoubleSide
+  });
 
-for (var id in node_colors) {
-  node_materials.push(new THREE.MeshLambertMaterial({
-    color : node_colors[id],
+var node_material = new THREE.MeshLambertMaterial({
+    color : 0x808080,
     polygonOffset : true,
     polygonOffsetFactor : 1,
     polygonOffsetUnits : 1,
-    opacity : 1.0,
-    transparent : true
-  }));
-}
+    opacity : 0.001,
+    transparent : true,
+    side: THREE.DoubleSide
+  });
 
-window.addEventListener("DOMContentLoaded", function() {
-  var object_info = {};
-  var treelet_stack = [];
-  var internals_level = 0;
-  var must_redraw = false;
-  var show_internals = false;
+var geometry = new THREE.BoxBufferGeometry(1, 1, 1);
 
-  /* CONTAINER */
-  var container = document.createElement('div');
-  document.body.appendChild(container);
-
-  var back_button = document.querySelector("#back");
-  var show_internals_checkbox = document.querySelector("#show-internals");
-  var show_internals_switch = document.querySelector("#show-internals-switch");
-
-  back_button.onclick = function(e) {
-    e.preventDefault();
-
-    if (show_internals) {
-      if (internals_level == 0) {
-        return;
-      }
-
-      internals_level--;
-    } else {
-      treelet_stack.pop();
-    }
-
-    update_breadcrumbs();
-    must_redraw = true;
-
-    if (treelet_stack.length == 0) {
-      back_button.style.visibility = "hidden";
-      show_internals_switch.style.visibility = "hidden";
-    }
-  };
-
-  show_internals_switch.onclick = function(e) {
-    show_internals = show_internals_checkbox.checked;
-    update_breadcrumbs();
-    must_redraw = true;
-
-    if (!show_internals) {
-      internals_level = 0;
-    }
-  };
-
-  /* BREADCRUMBS */
-  var breadcrumbs = document.querySelector("#breadcrumbs");
-
-  /* SCENE */
-  var scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xf0f0f0);
-
-  /* CAMERA */
-  var camera = new THREE.PerspectiveCamera(
-      75, window.innerWidth / window.innerHeight, 0.1, 10000);
-  camera.position.z = 5;
-
-  /* LIGHT */
-  var light = new THREE.AmbientLight(0xcccccc);
-  scene.add(light);
-
-  /* CUBES */
-  var geometry = new THREE.BoxBufferGeometry(1, 1, 1);
-
-  var create_cube = function(id, is_treelet, x_min, x_max) {
+var create_cube = function(treelet_id,id, is_treelet, x_min, x_max) {
     var object = new THREE.Mesh(
-        geometry, is_treelet ? materials[id % materials.length]
-                             : node_materials[id % node_materials.length]);
+        geometry, is_treelet ? treelet_material: node_material);
 
     object.position.x = (x_min[0] + x_max[0]) / 2;
     object.position.y = (x_min[1] + x_max[1]) / 2;
     object.position.z = (x_min[2] + x_max[2]) / 2;
-    object.scale.x = (x_max[0] - x_min[0]) * 0.95;
-    object.scale.y = (x_max[1] - x_min[1]) * 0.95;
-    object.scale.z = (x_max[2] - x_min[2]) * 0.95;
+    object.scale.x = (x_max[0] - x_min[0]) * .99
+    object.scale.y = (x_max[1] - x_min[1]) * .99
+    object.scale.z = (x_max[2] - x_min[2]) * .99
 
     scene.add(object);
 
     var geo = new THREE.EdgesGeometry(object.geometry);
-    var mat = new THREE.LineBasicMaterial({color : 0x000000, opacity : 1});
+    if(!is_treelet && id != treelet_id){
+          var mat = new THREE.LineBasicMaterial({color : 0x808080, opacity : 0.4,transparent: true});
+    }
+    else if(is_treelet && treelet_id != null){
+      var mat = new THREE.LineBasicMaterial({color : 0xff0000, opacity : 1,transparent: true});
+    }
+    else{
+      var mat = new THREE.LineBasicMaterial({color : 0xff0000, opacity : 1,transparent: true});
+    }
     var wireframe = new THREE.LineSegments(geo, mat);
 
     object.add(wireframe);
-    object_info[object.id] = {id : id, is_treelet : is_treelet};
   };
 
-  create_cube(0, true, treelets[0].bounds[0], treelets[0].bounds[1]);
+//instantiate scene 
+var scene = new THREE.Scene();
+var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+var light = new THREE.AmbientLight(0xcccccc);
+scene.add(light);
+scene.background = new THREE.Color(0xf0f0f0);
+camera.position.z = 5;
+var must_redraw = false
 
-  /* MOUSE */
-  var mouse = new THREE.Vector2();
-  var intersected;
-  var offset = new THREE.Vector3(10, 10, 10);
 
-  /* RENDERED */
-  var renderer = new THREE.WebGLRenderer({antialias : true});
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  container.appendChild(renderer.domElement);
-  document.addEventListener('mousemove', on_mouse_move, false);
-  document.addEventListener('resize', on_window_resize, false);
-  document.addEventListener('mouseup', on_mouse_up, false);
+//instantiate renderer
+var renderer = new THREE.WebGLRenderer();
+renderer.setSize( window.innerWidth, window.innerHeight );
+renderer.context.disable(renderer.context.DEPTH_TEST);
+document.body.appendChild( renderer.domElement );
 
-  /* RAYCASTER */
-  var raycaster = new THREE.Raycaster();
+//instantiate controls 
+var controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.update();
 
-  /* CONTROLS */
-  var controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.update();
+//Root 
+var treelet_id_stack = [];
+treelet_id_stack.push(treelets[0].id);
+let treelet = treelets[treelet_id_stack.slice(-1)[0]];
+var BaseBVHNodes = treelet.nodes;
+// create_cube(0,0, true, treelet.bounds[0], treelet.bounds[1]);
+//internal BVH
+renderInternals(0)
 
-  var highlight_treelet =
-      function() {
-    raycaster.setFromCamera(mouse, camera);
-    var intersects = raycaster.intersectObjects(scene.children);
-
-    if (intersects.length > 0) {
-      if (intersected != intersects[0].object) {
-        scene.traverse(function(node) {
-          if (node instanceof THREE.Mesh) {
-            node.material.opacity = 0.8;
-          }
-        });
-
-        intersected = intersects[0].object;
-        intersected.material.opacity = 1.0;
+document.addEventListener("keydown", onDocumentKeyDown, false);
+function onDocumentKeyDown(event) {
+    var keyCode = event.which;
+    let curr_id = treelet_id_stack.slice(-1)[0];
+    let current_treelet = treelets[curr_id];
+    if(keyCode == 83){
+      treelet_id_stack.pop();
+      if (treelet_id_stack.length == 0){
+        treelet_id_stack.push(0);
       }
-    } else {
-      scene.traverse(function(node) {
-        if (node instanceof THREE.Mesh) {
-          node.material.opacity = 1.0;
-        }
-      });
+      must_redraw = true
+      // animate();
+    } // "s"
+    else if(keyCode == 87){
+      if(curr_id + 1 < treelets.length){
+        treelet_id_stack.push(curr_id + 1)
+      }
+      must_redraw = true
+      // animate();
 
-      intersected = null;
+    } // "w"
+
+}
+//renders internal nodes with red outline on the treelet id chosen
+function renderInternals(treelet_id,depth_lvl = 8,beginning_idx = 1){
+  let righttmost_idx = Math.pow(2, depth_lvl - 1);
+  let nodes_subset = BaseBVHNodes.slice(beginning_idx,2 * righttmost_idx + 1);
+  for(var node_idx in nodes_subset) {
+    let node = nodes_subset[node_idx]
+    if(node != null){
+      let node_id = node[1]
+      let node_bound_0 = node[0][0]
+      let node_bound_1 = node[0][1]
+      create_cube(treelet_id,node_id,false,node_bound_0,node_bound_1)
+    }
+  }
+  let new_nodes = treelets[treelet_id].nodes.slice(beginning_idx,2 * righttmost_idx + 1);
+  for (var node_idx in new_nodes){
+    let node = new_nodes[node_idx]
+    if (node != null){
+    // console.log(node[1])
+      let node_id = node[1]
+      let node_bound_0 = node[0][0]
+      let node_bound_1 = node[0][1]
+      create_cube(treelet_id,node_id,false,node_bound_0,node_bound_1)
     }
   }
 
-  var animate = function() {
-    requestAnimationFrame(animate);
-
-    if (must_redraw) {
-      while (scene.children.length > 0) {
+}
+function animate() {
+  requestAnimationFrame( animate );
+  controls.update();
+  if(must_redraw){
+     while (scene.children.length > 0) {
         scene.remove(scene.children[0]);
       }
-
-      object_info = {}; // clear out objects
       scene.add(light);
-
-      if (show_internals) {
-        let current_treelet_id = treelet_stack.slice(-1)[0];
-
-        let treelet = treelets[current_treelet_id];
-        let nodes = treelet.nodes;
-
-        for (var i = 0; i < Math.pow(2, internals_level); i++) {
-          let node_index = Math.pow(2, internals_level) - 1 + i;
-          let node = nodes[node_index];
-
-          if (node) {
-            create_cube(node_index, false, node[0], node[1]);
-          }
-        }
-      } else {
-        for (var id in treelets) {
-          let treelet = treelets[id];
-          if (treelet.parent == treelet_stack.slice(-1)[0]) {
-            create_cube(id, true, treelet.bounds[0], treelet.bounds[1]);
-          }
-        }
-      }
-
+      let current_treelet_id = treelet_id_stack.slice(-1)[0]
+      let current_treelet = treelets[current_treelet_id] 
+      // create_cube(current_treelet_id,0, true, treelet.bounds[0], treelet.bounds[1]);
+      renderInternals(current_treelet_id)
       must_redraw = false;
-    }
 
-    highlight_treelet();
-    controls.update();
-    renderer.render(scene, camera);
-  };
-
-  function update_breadcrumbs() {
-    breadcrumbs.innerHTML =
-        treelet_stack.join(" &#8594; ") +
-        (show_internals ? (" (" + internals_level + ")") : "");
   }
-
-  function on_mouse_move(e) {
-    e.preventDefault();
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-  }
-
-  function on_mouse_up(e) {
-    e.preventDefault();
-
-    if (intersected !== null) {
-      let info = object_info[intersected.id];
-
-      if (info.is_treelet) {
-        treelet_stack.push(info.id);
-      } else {
-        internals_level++;
-      }
-
-      must_redraw = true;
-      back_button.style.visibility = "visible";
-      show_internals_switch.style.visibility = "visible";
-      update_breadcrumbs();
-    }
-  }
-
-  function on_window_resize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  }
-
-  animate();
-}, false);
+  renderer.render( scene, camera );
+}
+animate();
