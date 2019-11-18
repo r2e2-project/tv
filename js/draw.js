@@ -54,11 +54,10 @@ var treelet_info_level =  document.getElementById("treelet_info_level");
 
 //instantiate scene 
 var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 10000 );
 var light = new THREE.AmbientLight(0xcccccc);
 scene.add(light);
 scene.background = new THREE.Color(0xf0f0f0);
-camera.position.z = 5;
 var must_redraw = false
 
 
@@ -78,6 +77,7 @@ treelet_id_stack.push(treelets[0].id);
 let treelet = treelets[treelet_id_stack.slice(-1)[0]];
 var BaseBVHNodes = treelet.nodes;
 must_redraw = true
+camera.position.z = 5 * treelet.nodes[0][0][1][2] ;
 
 document.addEventListener("keydown", onDocumentKeyDown, false);
 function onDocumentKeyDown(event) {
@@ -105,13 +105,15 @@ function renderInternals(treelet_id,depth_lvl = 8,beginning_idx = 1){
   let righttmost_idx = Math.pow(2, depth_lvl - 1);
   let nodes_subset = BaseBVHNodes.slice(beginning_idx,2 * righttmost_idx + 1);
   //render BaseBVHNodes
-  for(var node_idx in nodes_subset) {
-    let node = nodes_subset[node_idx]
-    if(node != null){
-      let node_id = node[1]
-      let node_bound_0 = node[0][0]
-      let node_bound_1 = node[0][1]
-      create_cube(treelet_id,node_id,false,node_bound_0,node_bound_1)
+  if(treelet_id != 0){
+    for(var node_idx in nodes_subset) {
+      let node = nodes_subset[node_idx]
+      if(node != null){
+        let node_id = node[1]
+        let node_bound_0 = node[0][0]
+        let node_bound_1 = node[0][1]
+        create_cube(treelet_id,node_id,false,node_bound_0,node_bound_1)
+      }
     }
   }
   //render BVHNodes with red outline 
