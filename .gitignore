@@ -1,7 +1,9 @@
 
-.DS_Store
-js/data/old_treelets.js
-js/data/sphere_example.json
-js/data/icosphere_example.json
 js/data/treelets_killeroo.js
 js/data/treelets_sphere.js
+*.txt
+*.json
+js/data/.DS_Store
+js/.DS_Store
+scripts/.DS_Store
+.DS_Store

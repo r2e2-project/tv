@@ -48,9 +48,11 @@ var create_cube = function(treelet_id,id, is_treelet, x_min, x_max) {
 
     object.add(wireframe);
   };
+
+//load_scene 
 //instantiate text buffers
 var treelet_info_id = document.getElementById("treelet_info_id");
-var treelet_info_level =  document.getElementById("treelet_info_level");
+// var treelet_info_level =  document.getElementById("treelet_info_level");
 
 //instantiate scene 
 var scene = new THREE.Scene();
@@ -72,18 +74,16 @@ var controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.update();
 
 //Root 
-var treelet_id_stack = [];
-treelet_id_stack.push(treelets[0].id);
-let treelet = treelets[treelet_id_stack.slice(-1)[0]];
-var BaseBVHNodes = treelet.nodes;
+treelet_id_stack = []
+treelet_id_stack.push(0);
+// renderBaseBVH(depth_limit = 10)
 must_redraw = true
-camera.position.z = 5 * treelet.nodes[0][0][1][2] ;
+camera.position.z = 5000;
 
 document.addEventListener("keydown", onDocumentKeyDown, false);
 function onDocumentKeyDown(event) {
     var keyCode = event.which;
     let curr_id = treelet_id_stack.slice(-1)[0];
-    let current_treelet = treelets[curr_id];
     if(keyCode == 83){
       treelet_id_stack.pop();
       if (treelet_id_stack.length == 0){
@@ -92,7 +92,7 @@ function onDocumentKeyDown(event) {
       must_redraw = true
     } // "s"
     else if(keyCode == 87){
-      if(curr_id + 1 < treelets.length){
+      if(curr_id + 1 < treelet_map.length){
         treelet_id_stack.push(curr_id + 1)
       }
       must_redraw = true
@@ -100,33 +100,27 @@ function onDocumentKeyDown(event) {
     } // "w"
 
 }
-//renders internal nodes with red outline on the treelet id chosen
-function renderInternals(treelet_id,depth_lvl = 8,beginning_idx = 1){
-  let righttmost_idx = Math.pow(2, depth_lvl - 1);
-  let nodes_subset = BaseBVHNodes.slice(beginning_idx,2 * righttmost_idx + 1);
-  //render BaseBVHNodes
-  if(treelet_id != 0){
-    for(var node_idx in nodes_subset) {
-      let node = nodes_subset[node_idx]
-      if(node != null){
-        let node_id = node[1]
-        let node_bound_0 = node[0][0]
-        let node_bound_1 = node[0][1]
-        create_cube(treelet_id,node_id,false,node_bound_0,node_bound_1)
-      }
-    }
+//render the base bvh nodes in overall bvh structure
+function renderBaseBVH(depth_limit = 10){
+  var nodes_to_render = bvh_nodes.filter(function(bvh_nodes){
+    return bvh_nodes.depth < depth_limit
+  });
+  for (let idx = 0; idx < nodes_to_render.length; idx++){
+    min_bounds = nodes_to_render[idx].Bounds[0]
+    max_bounds = nodes_to_render[idx].Bounds[1]
+    create_cube(-1,0,false,min_bounds,max_bounds)
   }
-  //render BVHNodes with red outline 
-  let new_nodes = treelets[treelet_id].nodes.slice(beginning_idx,2 * righttmost_idx + 1);
-  for (var node_idx in new_nodes){
-    let node = new_nodes[node_idx]
-    if (node != null){
-    // console.log(node[1])
-      let node_id = node[1]
-      let node_bound_0 = node[0][0]
-      let node_bound_1 = node[0][1]
-      create_cube(treelet_id,node_id,false,node_bound_0,node_bound_1)
-    }
+
+
+}
+//renders internal nodes with red outline on the treelet id chosen
+function renderInternals(treelet_id,node_limit=1000){
+  //always render baseBVH to a certain depth, then render treelet_id nodes 
+  renderBaseBVH();
+  let treelet = treelet_map[treelet_id]
+  for(let idx = 0; idx < node_limit; idx++){
+    let node = treelet.nodes[idx];
+    create_cube(treelet_id,-1,true,bvh_nodes[node].Bounds[0],bvh_nodes[node].Bounds[1]);
   }
 
 }
@@ -134,18 +128,17 @@ function animate() {
   requestAnimationFrame( animate );
   controls.update();
   let current_treelet_id = treelet_id_stack.slice(-1)[0]
-  let current_treelet = treelets[current_treelet_id]  
   if(must_redraw){
      while (scene.children.length > 0) {
         scene.remove(scene.children[0]);
       }
       scene.add(light);
-         renderInternals(current_treelet_id)
+      renderInternals(current_treelet_id,1000)
       must_redraw = false;
   }
 
   treelet_info_id.textContent = "Treelet ID: " + current_treelet_id.toString(10)
-  treelet_info_level.textContent = "Treelet Level: " + current_treelet.level
+  // treelet_info_level.textContent = "Treelet Level: " + current_treelet.level
   renderer.render( scene, camera );
 }
 animate();
