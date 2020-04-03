@@ -55,7 +55,6 @@ def parse_bvh_node_file(filename: str,outname: str):
 def parse_treelet_line(line: str):
 	line_dict = {}
 	parsed_line = line.strip("][,\n")
-	
 	treelet_start_idx = 0;
 	treelet_end_idx = parsed_line.rfind(",nodes:")
 	treelet_section = parsed_line[treelet_start_idx:treelet_end_idx].split(":")

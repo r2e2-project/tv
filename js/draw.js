@@ -54,6 +54,10 @@ var create_cube = function(treelet_id,id, is_treelet, x_min, x_max) {
 var treelet_info_id = document.getElementById("treelet_info_id");
 // var treelet_info_level =  document.getElementById("treelet_info_level");
 
+//insantiate variables
+var treelets = data[0].treelet_data;
+var base_bvh_nodes = data[0].base_nodes_data;
+
 //instantiate scene 
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 10000 );
@@ -92,18 +96,18 @@ function onDocumentKeyDown(event) {
       must_redraw = true
     } // "s"
     else if(keyCode == 87){
-      if(curr_id + 1 < treelet_map.length){
+      if(curr_id + 1 < treelets.length){
         treelet_id_stack.push(curr_id + 1)
       }
       must_redraw = true
 
-    } // "w"
+    } // "w"w
 
 }
 //render the base bvh nodes in overall bvh structure
 function renderBaseBVH(depth_limit = 10){
-  var nodes_to_render = bvh_nodes.filter(function(bvh_nodes){
-    return bvh_nodes.depth < depth_limit
+  var nodes_to_render = base_bvh_nodes.filter(function(base_bvh_nodes){
+    return base_bvh_nodes.depth < depth_limit
   });
   for (let idx = 0; idx < nodes_to_render.length; idx++){
     min_bounds = nodes_to_render[idx].Bounds[0]
@@ -117,10 +121,13 @@ function renderBaseBVH(depth_limit = 10){
 function renderInternals(treelet_id,node_limit=1000){
   //always render baseBVH to a certain depth, then render treelet_id nodes 
   renderBaseBVH();
-  let treelet = treelet_map[treelet_id]
-  for(let idx = 0; idx < node_limit; idx++){
+  let treelet = treelets[treelet_id]
+  // console.log(treelet)
+  min_nodes = Math.min(node_limit,treelet.nodes.length)
+  for(let idx = 0; idx < min_nodes; idx++){
     let node = treelet.nodes[idx];
-    create_cube(treelet_id,-1,true,bvh_nodes[node].Bounds[0],bvh_nodes[node].Bounds[1]);
+    // console.log(node.Bounds[0])
+    create_cube(treelet_id,-1,true,node.Bounds[0][0],node.Bounds[0][1]);
   }
 
 }
