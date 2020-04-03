@@ -60,7 +60,7 @@ var base_bvh_nodes = data[0].base_nodes_data;
 
 //instantiate scene 
 var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 10000 );
+var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 10000000 );
 var light = new THREE.AmbientLight(0xcccccc);
 scene.add(light);
 scene.background = new THREE.Color(0xf0f0f0);
@@ -82,7 +82,7 @@ treelet_id_stack = []
 treelet_id_stack.push(0);
 // renderBaseBVH(depth_limit = 10)
 must_redraw = true
-camera.position.z = 5000;
+camera.position.z = 10000;
 
 document.addEventListener("keydown", onDocumentKeyDown, false);
 function onDocumentKeyDown(event) {
