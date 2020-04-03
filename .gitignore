@@ -1,2 +1,9 @@
 
+js/data/treelets_killeroo.js
+js/data/treelets_sphere.js
+*.txt
+*.json
+js/data/.DS_Store
+js/.DS_Store
+scripts/.DS_Store
 .DS_Store
