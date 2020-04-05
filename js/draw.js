@@ -21,6 +21,27 @@ var node_material = new THREE.MeshLambertMaterial({
 
 var geometry = new THREE.BoxBufferGeometry(1, 1, 1);
 
+var line_material = new THREE.LineBasicMaterial({color: 0x0000ff})
+
+var create_ray_transfer = function(src_treelet_bounds,dst_treelet_bounds){
+  var points = [];
+  let perturbation_scale = 1000.0;
+  points.push(new THREE.Vector3( perturbation_scale * Math.random() + (src_treelet_bounds[0][0] + src_treelet_bounds[1][0])/2 ,
+                                 perturbation_scale * Math.random() + (src_treelet_bounds[0][1] + src_treelet_bounds[1][1])/2,
+                                 perturbation_scale * Math.random() + (src_treelet_bounds[0][2] + src_treelet_bounds[1][2])/2))
+  points.push(new THREE.Vector3( perturbation_scale * Math.random() + (dst_treelet_bounds[0][0] + dst_treelet_bounds[1][0])/2,
+                                 perturbation_scale * Math.random() + (dst_treelet_bounds[0][1] + dst_treelet_bounds[1][1])/2,
+                                 perturbation_scale * Math.random() + (dst_treelet_bounds[0][2] + dst_treelet_bounds[1][2])/2))
+
+  // console.log((src_treelet_bounds[0][0] + src_treelet_bounds[1][0])/2)
+  
+  var line_geometry = new THREE.BufferGeometry().setFromPoints(points);
+  var line = new THREE.Line(line_geometry,line_material)
+  scene.add(line);
+
+
+
+}
 var create_cube = function(treelet_id,id, is_treelet, x_min, x_max) {
     var object = new THREE.Mesh(
         geometry, is_treelet ? treelet_material: node_material);
@@ -57,6 +78,7 @@ var treelet_info_id = document.getElementById("treelet_info_id");
 //insantiate variables
 var treelets = data[0].treelet_data;
 var base_bvh_nodes = data[0].base_nodes_data;
+// console.log(rays)
 
 //instantiate scene 
 var scene = new THREE.Scene();
@@ -80,6 +102,8 @@ controls.update();
 //Root 
 treelet_id_stack = []
 treelet_id_stack.push(0);
+ray_time_stack = []
+ray_time_stack.push(0)
 // renderBaseBVH(depth_limit = 10)
 must_redraw = true
 camera.position.z = 10000;
@@ -88,6 +112,7 @@ document.addEventListener("keydown", onDocumentKeyDown, false);
 function onDocumentKeyDown(event) {
     var keyCode = event.which;
     let curr_id = treelet_id_stack.slice(-1)[0];
+    let curr_time = ray_time_stack.slice(-1)[0];
     if(keyCode == 83){
       treelet_id_stack.pop();
       if (treelet_id_stack.length == 0){
@@ -100,8 +125,22 @@ function onDocumentKeyDown(event) {
         treelet_id_stack.push(curr_id + 1)
       }
       must_redraw = true
-
-    } // "w"w
+    }
+    else if(keyCode == 65){
+      ray_time_stack.pop()
+      if(ray_time_stack.length == 0){
+        ray_time_stack.push(0)
+        }
+      must_redraw = true;
+      }
+    else if(keyCode == 68){
+      if(curr_time + 1 < rays.length){
+        ray_time_stack.push(curr_time + 1)
+      }
+      must_redraw = true
+    }
+      
+     // "w"w
 
 }
 //render the base bvh nodes in overall bvh structure
@@ -118,7 +157,7 @@ function renderBaseBVH(depth_limit = 10){
 
 }
 //renders internal nodes with red outline on the treelet id chosen
-function renderInternals(treelet_id,node_limit=1000){
+function renderInternals(treelet_id,ray_id,node_limit=1000){
   //always render baseBVH to a certain depth, then render treelet_id nodes 
   renderBaseBVH();
   let treelet = treelets[treelet_id]
@@ -129,23 +168,36 @@ function renderInternals(treelet_id,node_limit=1000){
     // console.log(node.Bounds[0])
     create_cube(treelet_id,-1,true,node.Bounds[0][0],node.Bounds[0][1]);
   }
+  let curr_ray_transfers = rays[ray_id].ray_transfers
+  // console.log(curr_ray_transfers)
+  let ray_sampling_rate = 100
+  for(let j = 0; j < curr_ray_transfers.length;j+=ray_sampling_rate){
+      let src = curr_ray_transfers[j][0]
+      let dst = curr_ray_transfers[j][1]
+      if (treelets[src] != null && treelets[dst] != null){
+      let src_treelet = treelets[src].nodes[0]
+      let dst_treelet = treelets[dst].nodes[0]
+      create_ray_transfer(src_treelet.Bounds[0],dst_treelet.Bounds[0])
+      }
+  }
 
 }
 function animate() {
   requestAnimationFrame( animate );
   controls.update();
   let current_treelet_id = treelet_id_stack.slice(-1)[0]
+  let current_time_id = ray_time_stack.slice(-1)[0]
   if(must_redraw){
      while (scene.children.length > 0) {
         scene.remove(scene.children[0]);
       }
       scene.add(light);
-      renderInternals(current_treelet_id,1000)
+      renderInternals(current_treelet_id,current_time_id,1000)
       must_redraw = false;
   }
 
   treelet_info_id.textContent = "Treelet ID: " + current_treelet_id.toString(10)
-  // treelet_info_level.textContent = "Treelet Level: " + current_treelet.level
+  ray_info_timestamp.textContent = "Time: " + rays[current_time_id].timestamp.toString(10)
   renderer.render( scene, camera );
 }
 animate();
