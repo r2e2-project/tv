@@ -21,17 +21,36 @@ var node_material = new THREE.MeshLambertMaterial({
 
 var geometry = new THREE.BoxBufferGeometry(1, 1, 1);
 
-var line_material = new THREE.LineBasicMaterial({color: 0x0000ff})
+//insantiate variables
+var treelets = data[0].treelet_data;
+var base_bvh_nodes = data[0].base_nodes_data;
+// instantiate colors based on treelet data
+var MIN_COLOR = 0x808080
+var MAX_COLOR = 16600000;
+var MAX_ID = Math.max.apply(Math, treelets.map(function(o) { return o.treelet_idx; })); 
+// console.log(MAX_ID)
+var generate_id_color = function(id){
+  var id_int = Math.floor((id/MAX_ID) * MAX_COLOR) + MIN_COLOR;
+  let B = Math.floor(id_int % 256);
+  let G = Math.floor(id_int / 256 % 256); 
+  let R = Math.floor(id_int / 256 / 256 % 256);
+  return "rgb(" + R + "," + G + "," + B + ")";
+}
 
-var create_ray_transfer = function(src_treelet_bounds,dst_treelet_bounds){
+
+var create_ray_transfer = function(src_treelet,src_treelet_bounds,dst_treelet_bounds){
   var points = [];
   let perturbation_scale = 1000.0;
+  // let colors = [0x0093ba, 0x3cb44b, 0xffe119, 0x4363d8, 0xf58231, 0x911eb4, 0x42d4f4,
+  // 0xf032e6, 0xbfef45, 0xfabebe, 0x469990, 0xe6beff, 0x9A6324, 0xfffac8,
+  // 0x800000, 0xaaffc3, 0x808000, 0xffd8b1, 0x000075, 0xa9a9a9];
+  var line_material = new THREE.LineBasicMaterial({color: generate_id_color(src_treelet)})
   points.push(new THREE.Vector3( perturbation_scale * Math.random() + (src_treelet_bounds[0][0] + src_treelet_bounds[1][0])/2 ,
                                  perturbation_scale * Math.random() + (src_treelet_bounds[0][1] + src_treelet_bounds[1][1])/2,
                                  perturbation_scale * Math.random() + (src_treelet_bounds[0][2] + src_treelet_bounds[1][2])/2))
-  points.push(new THREE.Vector3( perturbation_scale * Math.random() + (dst_treelet_bounds[0][0] + dst_treelet_bounds[1][0])/2,
-                                 perturbation_scale * Math.random() + (dst_treelet_bounds[0][1] + dst_treelet_bounds[1][1])/2,
-                                 perturbation_scale * Math.random() + (dst_treelet_bounds[0][2] + dst_treelet_bounds[1][2])/2))
+  points.push(new THREE.Vector3( .1 * perturbation_scale * Math.random() + (dst_treelet_bounds[0][0] + dst_treelet_bounds[1][0])/2,
+                                 .1 * perturbation_scale * Math.random() + (dst_treelet_bounds[0][1] + dst_treelet_bounds[1][1])/2,
+                                 .1 * perturbation_scale * Math.random() + (dst_treelet_bounds[0][2] + dst_treelet_bounds[1][2])/2))
 
   // console.log((src_treelet_bounds[0][0] + src_treelet_bounds[1][0])/2)
   
@@ -75,10 +94,6 @@ var create_cube = function(treelet_id,id, is_treelet, x_min, x_max) {
 var treelet_info_id = document.getElementById("treelet_info_id");
 // var treelet_info_level =  document.getElementById("treelet_info_level");
 
-//insantiate variables
-var treelets = data[0].treelet_data;
-var base_bvh_nodes = data[0].base_nodes_data;
-// console.log(rays)
 
 //instantiate scene 
 var scene = new THREE.Scene();
@@ -170,14 +185,14 @@ function renderInternals(treelet_id,ray_id,node_limit=1000){
   }
   let curr_ray_transfers = rays[ray_id].ray_transfers
   // console.log(curr_ray_transfers)
-  let ray_sampling_rate = 100
+  let ray_sampling_rate = 1
   for(let j = 0; j < curr_ray_transfers.length;j+=ray_sampling_rate){
       let src = curr_ray_transfers[j][0]
       let dst = curr_ray_transfers[j][1]
       if (treelets[src] != null && treelets[dst] != null){
       let src_treelet = treelets[src].nodes[0]
       let dst_treelet = treelets[dst].nodes[0]
-      create_ray_transfer(src_treelet.Bounds[0],dst_treelet.Bounds[0])
+      create_ray_transfer(src,src_treelet.Bounds[0],dst_treelet.Bounds[0])
       }
   }
 
@@ -197,7 +212,7 @@ function animate() {
   }
 
   treelet_info_id.textContent = "Treelet ID: " + current_treelet_id.toString(10)
-  ray_info_timestamp.textContent = "Time: " + rays[current_time_id].timestamp.toString(10)
+  ray_info_timestamp.textContent = "Time: " + (rays[current_time_id].timestamp- rays[0].timestamp).toString(10) 
   renderer.render( scene, camera );
 }
 animate();
